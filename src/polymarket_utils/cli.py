@@ -6,7 +6,12 @@ from typing import Optional
 import click
 
 from polymarket_utils.client import GammaClient
-from polymarket_utils.config import load_config, Config, DEFAULT_CONFIG_TEMPLATE, CONFIG_FILE
+from polymarket_utils.config import (
+    load_config,
+    Config,
+    DEFAULT_CONFIG_TEMPLATE,
+    CONFIG_FILE,
+)
 from polymarket_utils.models import Event, Market
 
 # Load config once at module level
@@ -39,7 +44,11 @@ def print_events_table(events: list[Event]) -> None:
 
     # Rows
     for event in events:
-        title = event.title[:title_w] if len(event.title) <= title_w else event.title[: title_w - 3] + "..."
+        title = (
+            event.title[:title_w]
+            if len(event.title) <= title_w
+            else event.title[: title_w - 3] + "..."
+        )
         click.echo(
             f"{event.id:<{id_w}} {title:<{title_w}} {format_volume(event.volume):>{vol_w}} {event.market_count:>{markets_w}}"
         )
@@ -51,7 +60,9 @@ def print_event_detail(event: Event) -> None:
     click.echo(f"ID: {event.id}")
     click.echo(f"Volume: {format_volume(event.volume)}")
     click.echo(f"Category: {event.category or 'N/A'}")
-    click.echo(f"End Date: {event.end_date.strftime('%Y-%m-%d') if event.end_date else 'N/A'}")
+    click.echo(
+        f"End Date: {event.end_date.strftime('%Y-%m-%d') if event.end_date else 'N/A'}"
+    )
     click.echo(f"Active: {'Yes' if event.is_active else 'No'}")
 
     if event.description:
@@ -76,7 +87,9 @@ def print_market_detail(market: Market) -> None:
     click.echo(f"Volume: {format_volume(market.volume)}")
     click.echo(f"Liquidity: {format_volume(market.liquidity)}")
     click.echo(f"Category: {market.category or 'N/A'}")
-    click.echo(f"End Date: {market.end_date.strftime('%Y-%m-%d') if market.end_date else 'N/A'}")
+    click.echo(
+        f"End Date: {market.end_date.strftime('%Y-%m-%d') if market.end_date else 'N/A'}"
+    )
     click.echo(f"Active: {'Yes' if market.is_active else 'No'}")
 
     if market.outcomes and market.outcome_prices:
@@ -137,7 +150,9 @@ def config() -> None:
 
 @event.command("search")
 @click.argument("keyword")
-@click.option("--all", "include_closed", is_flag=True, help="Include closed events (slower)")
+@click.option(
+    "--all", "include_closed", is_flag=True, help="Include closed events (slower)"
+)
 @click.option("--fresh", is_flag=True, help="Bypass cache and fetch from API")
 @click.option(
     "--min-volume",
@@ -162,7 +177,9 @@ def event_search(
     # Use config defaults if not overridden
     active_only = _config.filters.active_only if not include_closed else False
     min_vol = min_volume if min_volume is not None else _config.filters.min_volume
-    end_date_min: Optional[date] = end_date.date() if end_date else _config.filters.end_date_min
+    end_date_min: Optional[date] = (
+        end_date.date() if end_date else _config.filters.end_date_min
+    )
 
     with _get_client() as client:
         events = client.get_events(
@@ -183,8 +200,7 @@ def event_search(
     # Filter by end date
     if end_date_min:
         events = [
-            e for e in events
-            if e.end_date is None or e.end_date.date() >= end_date_min
+            e for e in events if e.end_date is None or e.end_date.date() >= end_date_min
         ]
 
     # Sort by volume descending
@@ -220,14 +236,21 @@ def market_info(market_id: str) -> None:
 
 
 @cache.command("refresh")
-@click.option("--all", "include_closed", is_flag=True, help="Cache all events including closed (slower)")
+@click.option(
+    "--all",
+    "include_closed",
+    is_flag=True,
+    help="Cache all events including closed (slower)",
+)
 def cache_refresh(include_closed: bool) -> None:
     """Refresh the event cache."""
     active_only = not include_closed
     label = "all" if include_closed else "active"
 
     with _get_client() as client:
-        count = client.refresh_cache(active_only=active_only, on_progress=_progress_callback)
+        count = client.refresh_cache(
+            active_only=active_only, on_progress=_progress_callback
+        )
         click.echo("\r" + " " * 30 + "\r", nl=False)  # Clear progress line
         click.echo(f"Cached {count} {label} events.")
 
