@@ -1,0 +1,26 @@
+[project]
+name = "polymarket-utils"
+version = "0.1.0"
+description = "CLI utilities for Polymarket API"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.3.1",
+    "httpx>=0.28.1",
+    "pydantic>=2.12.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+polymarket = "polymarket_utils.cli:main"
+
+[dependency-groups]
+dev = [
+    "black>=26.1.0",
+    "mypy>=1.19.1",
+    "pytest>=9.0.2",
+    "ruff>=0.14.14",
+]
