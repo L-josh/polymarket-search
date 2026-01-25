@@ -31,7 +31,9 @@ class CacheConfig:
     """Cache configuration."""
 
     ttl: int = 3600  # 1 hour in seconds
-    dir: Path = field(default_factory=lambda: Path.home() / ".cache" / "polymarket-utils")
+    dir: Path = field(
+        default_factory=lambda: Path.home() / ".cache" / "polymarket-utils"
+    )
 
 
 @dataclass
