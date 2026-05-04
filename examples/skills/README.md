@@ -7,8 +7,8 @@ These are [Claude Code](https://claude.ai/code) skills that use `pms` to give Cl
 **1. Install `pms`** so Claude can run it:
 
 ```bash
-uv tool install git+https://github.com/L-josh/polymarket-search
-# or: pipx install git+https://github.com/L-josh/polymarket-search
+uv tool install polymarket-search
+# or: pipx install polymarket-search
 ```
 
 **2. Copy the skill** into your project's `.claude/commands/` directory:

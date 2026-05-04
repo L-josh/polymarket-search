@@ -2,32 +2,28 @@
 
 [![CI](https://github.com/L-josh/polymarket-search/actions/workflows/ci.yml/badge.svg)](https://github.com/L-josh/polymarket-search/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/L-josh/polymarket-search/branch/main/graph/badge.svg)](https://codecov.io/gh/L-josh/polymarket-search)
-[![GitHub tag](https://img.shields.io/github/v/tag/L-josh/polymarket-search?label=version)](https://github.com/L-josh/polymarket-search/tags)
+[![PyPI](https://img.shields.io/pypi/v/polymarket-search)](https://pypi.org/project/polymarket-search/)
 
 `polymarket-search` is a CLI and Python library that makes it easy to find, explore, and analyse [Polymarket](https://polymarket.com) prediction markets via the [Gamma API](https://gamma-api.polymarket.com).
 
-The Gamma API exposes all public market data but has no keyword search — to find events you have to page through everything. `polymarket-search` handles that: it fetches and caches the full event catalogue locally so you can search and filter instantly, and gives you clean access to live market prices and details.
+The gamma API markets/events endpoints don't provide for filtering, so this
+provides a simple interface for searching event names and finding their 
+markets. Read about the distinction between markets and events [here](https://docs.polymarket.com/concepts/markets-events).
 
 ## Installation
 
-**CLI tool** — puts `pms` in your PATH, no repo needed:
+**CLI tool** — puts `pms` in your PATH:
 
 ```bash
-# with uv (recommended)
-uv tool install git+https://github.com/L-josh/polymarket-search
-
-# with pipx
-pipx install git+https://github.com/L-josh/polymarket-search
+uv tool install polymarket-search   # with uv (recommended)
+pipx install polymarket-search      # with pipx
 ```
 
 **Python library** — add to an existing project:
 
 ```bash
-# with uv
-uv add git+https://github.com/L-josh/polymarket-search
-
-# with pip
-pip install git+https://github.com/L-josh/polymarket-search
+uv add polymarket-search   # with uv
+pip install polymarket-search      # with pip
 ```
 
 **Development** — clone and work on the source:
