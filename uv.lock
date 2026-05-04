@@ -331,7 +331,7 @@ wheels = [
 ]
 
 [[package]]
-name = "polymarket-utils"
+name = "polymarket-search"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

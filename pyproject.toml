@@ -1,5 +1,5 @@
 [project]
-name = "polymarket-utils"
+name = "polymarket-search"
 version = "0.1.0"
 description = "CLI utilities for Polymarket API"
 readme = "README.md"
@@ -17,7 +17,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-polymarket = "polymarket_utils.cli:main"
+pms = "polymarket_search.cli:main"
 
 [dependency-groups]
 dev = [

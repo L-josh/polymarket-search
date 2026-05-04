@@ -1,4 +1,4 @@
-"""Configuration management for polymarket-utils."""
+"""Configuration management for polymarket-search."""
 
 from dataclasses import dataclass, field
 from datetime import date
@@ -13,7 +13,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # type: ignore[import-not-found,no-redef]
 
-CONFIG_DIR = Path.home() / ".config" / "polymarket-utils"
+CONFIG_DIR = Path.home() / ".config" / "polymarket-search"
 CONFIG_FILE = CONFIG_DIR / "config.toml"
 
 
@@ -32,7 +32,7 @@ class CacheConfig:
 
     ttl: int = 3600  # 1 hour in seconds
     dir: Path = field(
-        default_factory=lambda: Path.home() / ".cache" / "polymarket-utils"
+        default_factory=lambda: Path.home() / ".cache" / "polymarket-search"
     )
 
 
@@ -86,8 +86,8 @@ def load_config() -> Config:
 
 # Default config template for users
 DEFAULT_CONFIG_TEMPLATE = """\
-# polymarket-utils configuration
-# Location: ~/.config/polymarket-utils/config.toml
+# polymarket-search configuration
+# Location: ~/.config/polymarket-search/config.toml
 
 [filters]
 # Only show active (non-closed) events by default
@@ -103,6 +103,6 @@ end_date_min = "2026-01-01"
 # Cache time-to-live in seconds (3600 = 1 hour)
 ttl = 3600
 
-# Cache directory (default: ~/.cache/polymarket-utils)
-# dir = "~/.cache/polymarket-utils"
+# Cache directory (default: ~/.cache/polymarket-search)
+# dir = "~/.cache/polymarket-search"
 """
