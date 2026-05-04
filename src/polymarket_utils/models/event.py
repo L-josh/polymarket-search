@@ -23,6 +23,7 @@ class Event(BaseModel):
     open_interest: float = Field(0, alias="openInterest")
     category: Optional[str] = None
     markets: list[Market] = Field(default_factory=list)
+    cached_market_count: Optional[int] = Field(None, alias="marketCount")
 
     model_config = {"populate_by_name": True}
 
@@ -37,5 +38,6 @@ class Event(BaseModel):
 
     @property
     def market_count(self) -> int:
-        """Number of markets in this event."""
-        return len(self.markets)
+        if self.markets:
+            return len(self.markets)
+        return self.cached_market_count or 0

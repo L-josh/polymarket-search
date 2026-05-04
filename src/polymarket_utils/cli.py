@@ -70,13 +70,13 @@ def print_event_detail(event: Event) -> None:
 
     if event.markets:
         click.echo(f"\nMarkets ({event.market_count}):")
-        click.echo("-" * 60)
+        click.echo("-" * 100)
         for market in event.markets:
             prices = ", ".join(
                 f"{outcome}: {price:.0%}"
                 for outcome, price in zip(market.outcomes, market.outcome_prices)
             )
-            click.echo(f"  [{market.id}] {market.question[:50]}")
+            click.echo(f"  [{market.id}] {market.question[:100]}")
             click.echo(f"       {prices}")
 
 

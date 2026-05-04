@@ -1,17 +1,21 @@
 """Gamma API client for Polymarket."""
 
+import asyncio
 import json
 import time
 from pathlib import Path
 from typing import Callable, Optional
 
 import httpx
+from platformdirs import user_cache_dir
 
 from polymarket_utils.models import Event, Market
 
 BASE_URL = "https://gamma-api.polymarket.com"
-DEFAULT_CACHE_DIR = Path.home() / ".cache" / "polymarket-utils"
+DEFAULT_CACHE_DIR = Path(user_cache_dir("polymarket-utils"))
 DEFAULT_CACHE_TTL = 3600  # 1 hour in seconds
+_FETCH_PAGE_SIZE = 500
+_FETCH_CONCURRENCY = 50
 
 
 class GammaClient:
@@ -55,50 +59,58 @@ class GammaClient:
     def _write_cache(self, events: list[dict], active_only: bool = True) -> None:
         """Write events to cache file."""
         self._ensure_cache_dir()
-        data = {
-            "cached_at": time.time(),
-            "events": events,
-        }
+        slim = []
+        for e in events:
+            entry = {k: v for k, v in e.items() if k != "markets"}
+            entry["marketCount"] = len(e.get("markets") or [])
+            slim.append(entry)
+        data = {"cached_at": time.time(), "events": slim}
         with open(self._cache_file(active_only), "w") as f:
             json.dump(data, f)
+
+    async def _fetch_all_events_async(
+        self,
+        active_only: bool = True,
+        on_progress: Optional[Callable[[int], None]] = None,
+    ) -> list[dict]:
+        params: dict = {"limit": _FETCH_PAGE_SIZE}
+        if active_only:
+            params["closed"] = "false"
+
+        all_events: list[dict] = []
+        offset = 0
+
+        async with httpx.AsyncClient(base_url=BASE_URL, timeout=30.0) as client:
+            while True:
+                offsets = [offset + i * _FETCH_PAGE_SIZE for i in range(_FETCH_CONCURRENCY)]
+                responses = await asyncio.gather(*[
+                    client.get("/events", params={**params, "offset": o})
+                    for o in offsets
+                ])
+
+                done = False
+                for resp in responses:
+                    resp.raise_for_status()
+                    batch = resp.json()
+                    all_events.extend(batch)
+                    if on_progress:
+                        on_progress(len(all_events))
+                    if len(batch) < _FETCH_PAGE_SIZE:
+                        done = True
+                        break
+
+                if done:
+                    break
+                offset += _FETCH_CONCURRENCY * _FETCH_PAGE_SIZE
+
+        return all_events
 
     def _fetch_all_events(
         self,
         active_only: bool = True,
         on_progress: Optional[Callable[[int], None]] = None,
     ) -> list[dict]:
-        """Fetch all events from API with pagination.
-
-        Args:
-            active_only: If True, only fetch non-closed events.
-            on_progress: Optional callback called with event count after each batch.
-        """
-        events = []
-        limit = 500
-        offset = 0
-
-        params: dict = {"limit": limit}
-        if active_only:
-            params["closed"] = "false"
-
-        while True:
-            params["offset"] = offset
-            response = self._http.get("/events", params=params)
-            response.raise_for_status()
-            batch = response.json()
-
-            if not batch:
-                break
-
-            events.extend(batch)
-            if on_progress:
-                on_progress(len(events))
-            offset += limit
-
-            if len(batch) < limit:
-                break
-
-        return events
+        return asyncio.run(self._fetch_all_events_async(active_only, on_progress))
 
     def get_events(
         self,
