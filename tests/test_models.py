@@ -51,6 +51,11 @@ class TestMarket:
         m = Market.model_validate(sample_market_api)
         assert m.volume == 1800000.0
 
+    def test_outcome_prices_as_plain_float_list(self, sample_market_api):
+        sample_market_api["outcomePrices"] = [0.7, 0.3]
+        m = Market.model_validate(sample_market_api)
+        assert m.outcome_prices == [0.7, 0.3]
+
     def test_populate_by_name(self):
         m = Market.model_validate({
             "id": "1",
