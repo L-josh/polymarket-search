@@ -4,7 +4,9 @@
 [![codecov](https://codecov.io/gh/L-josh/polymarket-search/branch/main/graph/badge.svg)](https://codecov.io/gh/L-josh/polymarket-search)
 [![GitHub tag](https://img.shields.io/github/v/tag/L-josh/polymarket-search?label=version)](https://github.com/L-josh/polymarket-search/tags)
 
-CLI and Python library for searching and exploring [Polymarket](https://polymarket.com) events and markets via the Gamma API.
+`polymarket-search` is a CLI and Python library that makes it easy to find, explore, and analyse [Polymarket](https://polymarket.com) prediction markets via the [Gamma API](https://gamma-api.polymarket.com).
+
+The Gamma API exposes all public market data but has no keyword search — to find events you have to page through everything. `polymarket-search` handles that: it fetches and caches the full event catalogue locally so you can search and filter instantly, and gives you clean access to live market prices and details.
 
 ## Installation
 
@@ -14,42 +16,40 @@ cd polymarket-search
 uv sync
 ```
 
-## CLI Usage
+## CLI (`pms`)
 
-### Search Events
+### Search events
 
 ```bash
 # Search active events by keyword, sorted by volume
 pms event search "bitcoin"
 
-# Multiple keywords (both must appear in title)
+# Require multiple keywords (all must appear in title)
 pms event search "bitcoin above"
 
-# Include ended events
+# Include ended/closed events
 pms event search "election" --all
 
-# Bypass cache and fetch fresh data
+# Bypass the local cache and fetch fresh data
 pms event search "bitcoin" --fresh
 
-# Filter by minimum volume
+# Minimum volume filter (USD)
 pms event search "bitcoin" --min-volume 100000
 ```
 
-### Event Details
+### Event and market details
 
 ```bash
+# Full event details with all its markets and current prices
 pms event info <event_id>
-```
 
-### Market Details
-
-```bash
+# Details for a single market
 pms market info <market_id>
 ```
 
-### Cache Management
+### Cache management
 
-Events are cached locally at `~/.cache/polymarket-search/` and auto-refresh after 1 hour.
+Events are cached at `~/.cache/polymarket-search/` and auto-refresh after 1 hour. The cache strips nested market data to keep it lean (~40 MB for ~10k active events).
 
 ```bash
 pms cache refresh          # Refresh active events
@@ -59,13 +59,15 @@ pms cache refresh --all    # Include closed events
 ### Configuration
 
 ```bash
-pms config show      # Show current config
-pms config path      # Show config file location
-pms config init      # Create a default config file
-pms config edit      # Open config in $EDITOR
+pms config init   # Create a config file with defaults
+pms config edit   # Open config in $EDITOR
+pms config show   # Show active configuration
+pms config path   # Show config file location
 ```
 
-## Python Library Usage
+Config lives at `~/.config/polymarket-search/config.toml` and lets you set default volume filters, date filters, and cache TTL.
+
+## Python library
 
 ```python
 from polymarket_search.client import GammaClient
@@ -75,18 +77,22 @@ with GammaClient() as client:
     events = client.get_events(active_only=True)
     bitcoin_events = [e for e in events if "bitcoin" in e.title.lower()]
 
-    # Get full event details (with markets)
+    # Full event details including all markets and current prices
     event = client.get_event("424475")
     for market in event.markets:
         prices = dict(zip(market.outcomes, market.outcome_prices))
         print(f"{market.question}: {prices}")
 
-    # Get a single market
+    # Single market lookup
     market = client.get_market("2097944")
     print(f"Yes: {market.outcome_prices[0]:.1%}")
 ```
 
-See [examples/](examples/) for more.
+See [examples/](examples/) for more, including how to find the nearest-expiry Bitcoin Up/Down markets.
+
+## Agent usage (Claude Code skill)
+
+`polymarket-search` is straightforward to use from AI agents. See [examples/skills/](examples/skills/) for a ready-to-use Claude Code skill that gives Claude the ability to search and analyse Polymarket markets on your behalf.
 
 ## Development
 
@@ -97,8 +103,6 @@ just types      # Type check (mypy)
 just test       # Run tests
 just check      # Run all checks
 ```
-
-Run tests with coverage:
 
 ```bash
 uv run pytest --cov=polymarket_search --cov-report=term-missing
