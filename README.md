@@ -10,6 +10,28 @@ The Gamma API exposes all public market data but has no keyword search — to fi
 
 ## Installation
 
+**CLI tool** — puts `pms` in your PATH, no repo needed:
+
+```bash
+# with uv (recommended)
+uv tool install git+https://github.com/L-josh/polymarket-search
+
+# with pipx
+pipx install git+https://github.com/L-josh/polymarket-search
+```
+
+**Python library** — add to an existing project:
+
+```bash
+# with uv
+uv add git+https://github.com/L-josh/polymarket-search
+
+# with pip
+pip install git+https://github.com/L-josh/polymarket-search
+```
+
+**Development** — clone and work on the source:
+
 ```bash
 git clone https://github.com/L-josh/polymarket-search
 cd polymarket-search

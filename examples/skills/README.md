@@ -4,14 +4,22 @@ These are [Claude Code](https://claude.ai/code) skills that use `pms` to give Cl
 
 ## Installation
 
-Copy the skill file into your project's `.claude/commands/` directory (create it if it doesn't exist):
+**1. Install `pms`** so Claude can run it:
+
+```bash
+uv tool install git+https://github.com/L-josh/polymarket-search
+# or: pipx install git+https://github.com/L-josh/polymarket-search
+```
+
+**2. Copy the skill** into your project's `.claude/commands/` directory:
 
 ```bash
 mkdir -p .claude/commands
-cp polymarket-analysis.md .claude/commands/
+curl -o .claude/commands/polymarket-analysis.md \
+  https://raw.githubusercontent.com/L-josh/polymarket-search/main/examples/skills/polymarket-analysis.md
 ```
 
-Then invoke it from Claude Code:
+**3. Invoke it** from Claude Code:
 
 ```
 /polymarket-analysis will the Fed cut rates this year
