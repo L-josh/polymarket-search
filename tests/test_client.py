@@ -170,3 +170,57 @@ class TestRefreshCache:
 
         data = json.loads(cache_file.read_text())
         assert data["events"][0]["id"] == "424475"
+
+
+class TestOnProgress:
+    def test_progress_callback_called(self, client, sample_event_api):
+        mock_http = _make_async_http([sample_event_api])
+        progress_calls = []
+        with patch("polymarket_search.client.httpx.AsyncClient", return_value=mock_http):
+            client.get_events(on_progress=progress_calls.append)
+        assert len(progress_calls) > 0
+        assert progress_calls[-1] == 1
+
+
+class TestMultiWaveFetch:
+    def test_fires_second_wave_when_first_is_full(self, client, sample_event_api):
+        from polymarket_search.client import _FETCH_PAGE_SIZE, _FETCH_CONCURRENCY
+
+        full_page = [sample_event_api] * _FETCH_PAGE_SIZE
+        empty_page = []
+
+        call_count = 0
+
+        async def mock_get(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            resp = MagicMock()
+            resp.raise_for_status = MagicMock()
+            # First wave: all full pages; second wave: all empty
+            resp.json.return_value = full_page if call_count <= _FETCH_CONCURRENCY else empty_page
+            return resp
+
+        mock_http = AsyncMock()
+        mock_http.__aenter__.return_value = mock_http
+        mock_http.get = mock_get
+
+        with patch("polymarket_search.client.httpx.AsyncClient", return_value=mock_http):
+            events = client.get_events()
+
+        assert len(events) == _FETCH_PAGE_SIZE * _FETCH_CONCURRENCY
+        assert call_count > _FETCH_CONCURRENCY
+
+
+class TestContextManager:
+    def test_enter_returns_self(self, client):
+        assert client.__enter__() is client
+
+    def test_exit_closes_http(self, client):
+        with patch.object(client._http, "close") as mock_close:
+            client.__exit__(None, None, None)
+        mock_close.assert_called_once()
+
+    def test_used_as_context_manager(self, tmp_path):
+        from polymarket_search.client import GammaClient
+        with GammaClient(cache_dir=tmp_path) as c:
+            assert isinstance(c, GammaClient)
