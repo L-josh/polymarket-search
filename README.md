@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/L-josh/polymarket-search/actions/workflows/ci.yml/badge.svg)](https://github.com/L-josh/polymarket-search/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/L-josh/polymarket-search/branch/main/graph/badge.svg)](https://codecov.io/gh/L-josh/polymarket-search)
+[![GitHub tag](https://img.shields.io/github/v/tag/L-josh/polymarket-search?label=version)](https://github.com/L-josh/polymarket-search/tags)
 
 CLI and Python library for searching and exploring [Polymarket](https://polymarket.com) events and markets via the Gamma API.
 

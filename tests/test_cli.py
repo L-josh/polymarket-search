@@ -1,11 +1,12 @@
 """Tests for CLI commands using Click's test runner."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
 
-from polymarket_search.cli import main
+from polymarket_search.cli import main, format_volume
 from polymarket_search.models import Event, Market
 
 
@@ -135,3 +136,69 @@ class TestConfigShow:
         assert result.exit_code == 0
         assert "active_only" in result.output
         assert "ttl" in result.output
+
+
+class TestConfigPath:
+    def test_prints_config_path(self, runner):
+        result = runner.invoke(main, ["config", "path"])
+        assert result.exit_code == 0
+        assert "config.toml" in result.output
+
+
+class TestConfigInit:
+    def test_creates_config_file(self, runner, tmp_path):
+        config_file = tmp_path / "config.toml"
+        with patch("polymarket_search.cli.CONFIG_FILE", config_file):
+            result = runner.invoke(main, ["config", "init"])
+        assert result.exit_code == 0
+        assert config_file.exists()
+        assert "active_only" in config_file.read_text()
+
+    def test_errors_if_already_exists(self, runner, tmp_path):
+        config_file = tmp_path / "config.toml"
+        config_file.parent.mkdir(parents=True, exist_ok=True)
+        config_file.write_text("[filters]")
+        with patch("polymarket_search.cli.CONFIG_FILE", config_file):
+            result = runner.invoke(main, ["config", "init"])
+        assert result.exit_code != 0
+        assert "already exists" in result.output
+
+
+class TestConfigEdit:
+    def test_opens_editor(self, runner, tmp_path):
+        config_file = tmp_path / "config.toml"
+        with patch("polymarket_search.cli.CONFIG_FILE", config_file):
+            with patch("subprocess.call") as mock_call:
+                with patch.dict("os.environ", {"EDITOR": "nano"}):
+                    result = runner.invoke(main, ["config", "edit"])
+        assert result.exit_code == 0
+        mock_call.assert_called_once()
+        assert "nano" in mock_call.call_args[0][0]
+
+    def test_creates_file_if_missing(self, runner, tmp_path):
+        config_file = tmp_path / "config.toml"
+        with patch("polymarket_search.cli.CONFIG_FILE", config_file):
+            with patch("subprocess.call"):
+                runner.invoke(main, ["config", "edit"])
+        assert config_file.exists()
+
+
+class TestFormatVolume:
+    def test_millions(self):
+        assert format_volume(2_500_000) == "$2.5M"
+
+    def test_thousands(self):
+        assert format_volume(15_000) == "$15.0K"
+
+    def test_small(self):
+        assert format_volume(500) == "$500"
+
+
+class TestMarketInfoError:
+    def test_error_on_missing_market(self, runner):
+        mock_client = _mock_client()
+        mock_client.__enter__.return_value.get_market.side_effect = Exception("not found")
+        with patch("polymarket_search.cli._get_client", return_value=mock_client):
+            result = runner.invoke(main, ["market", "info", "bad_id"])
+        assert result.exit_code != 0
+        assert "bad_id" in result.output
