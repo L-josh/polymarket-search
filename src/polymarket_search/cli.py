@@ -1,18 +1,18 @@
-"""CLI for polymarket-utils."""
+"""CLI for polymarket-search."""
 
 from datetime import date, datetime
 from typing import Optional
 
 import click
 
-from polymarket_utils.client import GammaClient
-from polymarket_utils.config import (
+from polymarket_search.client import GammaClient
+from polymarket_search.config import (
     load_config,
     Config,
     DEFAULT_CONFIG_TEMPLATE,
     CONFIG_FILE,
 )
-from polymarket_utils.models import Event, Market
+from polymarket_search.models import Event, Market
 
 # Load config once at module level
 _config: Config = load_config()

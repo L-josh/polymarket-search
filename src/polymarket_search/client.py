@@ -9,10 +9,10 @@ from typing import Callable, Optional
 import httpx
 from platformdirs import user_cache_dir
 
-from polymarket_utils.models import Event, Market
+from polymarket_search.models import Event, Market
 
 BASE_URL = "https://gamma-api.polymarket.com"
-DEFAULT_CACHE_DIR = Path(user_cache_dir("polymarket-utils"))
+DEFAULT_CACHE_DIR = Path(user_cache_dir("polymarket-search"))
 DEFAULT_CACHE_TTL = 3600  # 1 hour in seconds
 _FETCH_PAGE_SIZE = 500
 _FETCH_CONCURRENCY = 50
