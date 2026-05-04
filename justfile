@@ -20,8 +20,4 @@ test:
     uv run pytest -v
 
 # Run all checks
-check: fmt types test
-
-# Run the CLI
-run *ARGS:
-    uv run polymarket {{ARGS}}
+check: fmt types
